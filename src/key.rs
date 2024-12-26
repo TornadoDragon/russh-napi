@@ -5,6 +5,24 @@ use russh_keys::{HashAlg, PublicKeyBase64};
 
 #[napi]
 #[derive(Clone)]
+pub enum HashAlgorithm {
+    Sha1,
+    Sha256,
+    Sha512,
+}
+
+impl From<HashAlgorithm> for Option<HashAlg> {
+    fn from(value: HashAlgorithm) -> Self {
+        match value {
+            HashAlgorithm::Sha1 => None,
+            HashAlgorithm::Sha256 => Some(HashAlg::Sha256),
+            HashAlgorithm::Sha512 => Some(HashAlg::Sha512),
+        }
+    }
+}
+
+#[napi]
+#[derive(Clone)]
 pub struct SshPublicKey {
     inner: russh_keys::PublicKey,
 }

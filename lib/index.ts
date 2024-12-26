@@ -4,7 +4,7 @@ import { SFTP } from './sftp'
 import { Channel } from './channel'
 import { ClientEventInterface } from './events'
 
-import russh, { SshKeyPair, KeyboardInteractiveAuthenticationPrompt, SshClient, SshChannel, SshPublicKey, SshTransport } from './native'
+import russh, { SshKeyPair, KeyboardInteractiveAuthenticationPrompt, SshClient, SshChannel, SshPublicKey, SshTransport, HashAlgorithm } from './native'
 import { AgentConnectionSpec, makeRusshAgentConnection } from './agent'
 
 export class KeyPair {
@@ -109,9 +109,13 @@ export class SSHClient extends Destructible {
         return null
     }
 
-    async authenticateWithKeyPair(username: string, keyPair: KeyPair): Promise<AuthenticatedSSHClient | null> {
+    async authenticateWithKeyPair(username: string, keyPair: KeyPair, hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): Promise<AuthenticatedSSHClient | null> {
         this.assertNotDestructed()
-        const result = await this.client.authenticatePublickey(username, keyPair['inner'])
+        const result = await this.client.authenticatePublickey(username, keyPair['inner'], hashAlgorithm ? {
+            sha1: HashAlgorithm.Sha1,
+            sha256: HashAlgorithm.Sha256,
+            sha512: HashAlgorithm.Sha512,
+        }[hashAlgorithm] : null)
         if (result) {
             return this.intoAuthenticated()
         }
@@ -258,6 +262,7 @@ export {
     OPEN_APPEND, OPEN_CREATE, OPEN_READ, OPEN_TRUNCATE, OPEN_WRITE,
     SftpFile as SFTPFile,
     isPageantRunning,
+    HashAlgorithm,
 } from './native'
 export {
     SFTP, SFTPDirectoryEntry, SFTPMetadata,

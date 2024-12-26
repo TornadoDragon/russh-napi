@@ -12,6 +12,7 @@ use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::DisconnectReason;
 use russh::ChannelId;
+use russh_keys::key::PrivateKeyWithHashAlg;
 use russh_sftp::client::SftpSession;
 use sftp::SftpChannel;
 use tokio::sync::Mutex;
@@ -28,6 +29,7 @@ mod transport;
 pub use agent::*;
 pub use key::is_pageant_running;
 pub use key::parse_key;
+pub use key::HashAlgorithm;
 use transport::SshTransport;
 
 pub struct SSHClientHandler {
@@ -311,10 +313,18 @@ impl SshClient {
         &self,
         username: String,
         key: &SshKeyPair,
+        hash_algorithm: Option<HashAlgorithm>,
     ) -> napi::Result<bool> {
         let mut handle = self.handle.lock().await;
         handle
-            .authenticate_publickey(username, Arc::new(key.inner.clone()))
+            .authenticate_publickey(
+                username,
+                PrivateKeyWithHashAlg::new(
+                    Arc::new(key.inner.clone()),
+                    hash_algorithm.and_then(Into::into),
+                )
+                .map_err(WrappedError::from)?,
+            )
             .await
             .map_err(WrappedError::from)
             .map_err(Into::into)

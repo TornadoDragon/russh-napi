@@ -31,7 +31,7 @@ impl Drop for SshTransportInner {
                 let _ = futures::executor::block_on(socket.shutdown());
             }
             SshTransportInner::Command(child) => {
-                let _ = child.kill();
+                let _ = futures::executor::block_on(child.kill());
             }
             SshTransportInner::SshChannel(_) | SshTransportInner::SocksProxy(_) => {
                 // just drop the stream

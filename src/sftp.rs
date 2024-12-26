@@ -69,6 +69,7 @@ impl From<&FileAttributes> for SftpFileMetadata {
 }
 
 #[napi]
+#[derive(Clone)]
 pub enum SftpFileType {
     Directory,
     File,
@@ -88,6 +89,7 @@ impl From<FileType> for SftpFileType {
 }
 
 #[napi]
+#[derive(Clone)]
 pub struct SftpDirEntry {
     pub name: String,
     pub type_: SftpFileType,

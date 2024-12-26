@@ -903,15 +903,14 @@ dependencies = [
 
 [[package]]
 name = "napi"
-version = "3.0.0-alpha.3"
+version = "3.0.0-alpha.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53112614847625adf534655b35b7adcc66c4f6ca407284cca73fd5bb0cf8cde5"
+checksum = "5de0beff58a431b3bd6568b690bcf55d72d8dd7f8e0e613a0193a8a9a8eef26b"
 dependencies = [
  "bitflags",
  "ctor",
  "napi-build 2.1.3",
  "napi-sys",
- "once_cell",
  "tokio",
 ]
 
@@ -929,11 +928,10 @@ checksum = "e1c0f5d67ee408a4685b61f5ab7e58605c8ae3f2b4189f0127d804ff13d5560a"
 
 [[package]]
 name = "napi-derive"
-version = "3.0.0-alpha.3"
+version = "3.0.0-alpha.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "823fb2987af2446a2b4055604a920f2c1f1a028743c72adc8872d92da7e30d2b"
+checksum = "81f5e3b98fb51282253a2fa9903ae62273c68d89d6f8f304876de30354e86e1e"
 dependencies = [
- "cfg-if",
  "convert_case",
  "napi-derive-backend",
  "proc-macro2",
@@ -943,24 +941,22 @@ dependencies = [
 
 [[package]]
 name = "napi-derive-backend"
-version = "2.0.0-alpha.3"
+version = "2.0.0-alpha.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abd42151b3c26b5cdde9cf9a8fc5f7240de0919f234e14c6f54e3571d56e4dab"
+checksum = "a986ad1072af191e8e1e10a170644025f5b2ee28f2148f3acda818210960cc1a"
 dependencies = [
  "convert_case",
- "once_cell",
  "proc-macro2",
  "quote",
- "regex",
  "semver",
  "syn",
 ]
 
 [[package]]
 name = "napi-sys"
-version = "2.4.0"
+version = "3.0.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "427802e8ec3a734331fec1035594a210ce1ff4dc5bc1950530920ab717964ea3"
+checksum = "4cc061b99c514ad4b7abc99d4db1ca24b9542b7ff48b4760bd9f82b24611534d"
 dependencies = [
  "libloading",
 ]
@@ -1356,9 +1352,9 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.48.2"
+version = "0.49.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c086efe0c429fa0b4e448c67147366d0319ed1c9a051d91b8f38e93fef25cc7"
+checksum = "2b206640a622d63529540fc48036aa39f211b2b71432a451156004f40655cdb4"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -1416,9 +1412,9 @@ dependencies = [
 
 [[package]]
 name = "russh-keys"
-version = "0.48.1"
+version = "0.49.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fed9bf3da16ad2892a44b840e40483010295bfc8fda8134650c381654cb1ef36"
+checksum = "788a2439ce385856585346beb37c48e7c9eb5de5f4f00736720a19ffdb3f5bb5"
 dependencies = [
  "aes",
  "async-trait",
