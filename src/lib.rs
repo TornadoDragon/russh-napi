@@ -1,4 +1,6 @@
+use std::borrow::Cow;
 use std::convert::TryFrom;
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -48,6 +50,7 @@ pub fn supported_ciphers() -> Vec<String> {
         .map(|x| x.as_ref().to_string())
         .collect()
 }
+
 #[napi]
 pub fn supported_kex_algorithms() -> Vec<String> {
     russh::kex::ALL_KEX_ALGORITHMS
@@ -86,7 +89,7 @@ impl russh::client::Handler for SSHClientHandler {
 
     async fn check_server_key(
         &mut self,
-        server_public_key: &russh_keys::key::PublicKey,
+        server_public_key: &russh_keys::PublicKey,
     ) -> Result<bool, Self::Error> {
         let response = self
             .server_key_callback
@@ -364,8 +367,9 @@ impl SshClient {
             .await
             .map_err(WrappedError::from)?;
         for key in keys {
-            let (_agent, result) = handle.authenticate_future(&username, key, agent).await;
-            agent = _agent;
+            let result = handle
+                .authenticate_publickey_with(&username, key, &mut agent)
+                .await;
             let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
             if ret {
                 return Ok(true);
@@ -498,10 +502,12 @@ pub async fn connect(
             .collect();
     }
     if let Some(key_algos) = key_algos {
-        preferred.key = key_algos
-            .into_iter()
-            .filter_map(|x| russh_keys::key::Name::try_from(&x[..]).ok())
-            .collect();
+        preferred.key = Cow::Owned(
+            key_algos
+                .into_iter()
+                .filter_map(|x| russh_keys::Algorithm::from_str(&x[..]).ok())
+                .collect(),
+        );
     }
     if let Some(mac_algos) = mac_algos {
         preferred.mac = mac_algos

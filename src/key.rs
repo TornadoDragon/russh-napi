@@ -1,25 +1,24 @@
 use crate::error::WrappedError;
 use napi::bindgen_prelude::Uint8Array;
-use napi::Result;
 use napi_derive::napi;
-use russh_keys::PublicKeyBase64;
+use russh_keys::{HashAlg, PublicKeyBase64};
 
 #[napi]
 #[derive(Clone)]
 pub struct SshPublicKey {
-    inner: russh_keys::key::PublicKey,
+    inner: russh_keys::PublicKey,
 }
 
 #[napi]
 impl SshPublicKey {
     #[napi]
     pub fn algorithm(&self) -> String {
-        self.inner.name().into()
+        self.inner.algorithm().to_string()
     }
 
     #[napi]
     pub fn fingerprint(&self) -> String {
-        self.inner.fingerprint()
+        format!("{}", self.inner.fingerprint(HashAlg::Sha256))
     }
 
     #[napi]
@@ -33,8 +32,8 @@ impl SshPublicKey {
     }
 }
 
-impl From<russh_keys::key::PublicKey> for SshPublicKey {
-    fn from(inner: russh_keys::key::PublicKey) -> Self {
+impl From<russh_keys::PublicKey> for SshPublicKey {
+    fn from(inner: russh_keys::PublicKey) -> Self {
         SshPublicKey { inner }
     }
 }
@@ -42,17 +41,14 @@ impl From<russh_keys::key::PublicKey> for SshPublicKey {
 #[napi]
 #[derive(Clone)]
 pub struct SshKeyPair {
-    pub(crate) inner: russh_keys::key::KeyPair,
+    pub(crate) inner: russh_keys::PrivateKey,
 }
 
 #[napi]
 impl SshKeyPair {
     #[napi]
-    pub fn public_key(&self) -> Result<SshPublicKey> {
-        self.inner
-            .clone_public_key()
-            .map_err(|e| WrappedError::from(russh::Error::from(e)).into())
-            .map(Into::into)
+    pub fn public_key(&self) -> SshPublicKey {
+        self.inner.public_key().clone().into()
     }
 }
 
