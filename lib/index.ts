@@ -10,6 +10,10 @@ import { AgentConnectionSpec, makeRusshAgentConnection } from './agent'
 export class KeyPair {
     private constructor(protected inner: SshKeyPair) { }
 
+    get algorithm () {
+        return this.inner.publicKey().algorithm()
+    }
+
     static async parse(data: string, passphrase?: string): Promise<KeyPair> {
         return new KeyPair(await russh.parseKey(data, passphrase))
     }
