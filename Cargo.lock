@@ -90,6 +90,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "argon2"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c3610892ee6e0cbce8ae2700349fcf8f98adb0dbfbee85aec3c9179d29cc072"
+dependencies = [
+ "base64ct",
+ "blake2",
+ "cpufeatures",
+ "password-hash",
+]
+
+[[package]]
 name = "async-http-proxy"
 version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -162,6 +174,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "blake2"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46502ad458c9a52b69d4d4d32775c788b7a1b85e8bc9d482d92250fc0e3f8efe"
+dependencies = [
+ "digest",
 ]
 
 [[package]]
@@ -715,6 +736,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
 name = "hex-literal"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -794,12 +821,15 @@ dependencies = [
 
 [[package]]
 name = "internal-russh-forked-ssh-key"
-version = "0.6.3-internal.2"
+version = "0.6.7-internal.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e988fcc6eb3826bbaa0930ae2f97d7b5539852eaaddbd1293efde9b3e387361"
+checksum = "e38081ccec4be2cf4fa50de38a1797129a3b262ab822f1731cd83cb35fa799ae"
 dependencies = [
+ "argon2",
  "bcrypt-pbkdf",
  "ed25519-dalek",
+ "hex",
+ "hmac",
  "num-bigint-dig",
  "p256",
  "p384",
@@ -1142,6 +1172,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "password-hash"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "346f04948ba92c43e8469c1ee6736c7563d71012b17d40745260fe106aac2166"
+dependencies = [
+ "base64ct",
+ "rand_core",
+ "subtle",
+]
+
+[[package]]
 name = "pbkdf2"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1367,9 +1408,9 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.0-beta.2"
+version = "0.50.0-beta.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70e30c975898430fff5215b7181a51fbd70b8fe37b30f25f96cb593fd25e639f"
+checksum = "bf18eb8323cc34c943890dc73d4fea8e76378bae4e21f151165a2de04d516c70"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -1425,9 +1466,9 @@ dependencies = [
 
 [[package]]
 name = "russh-keys"
-version = "0.50.0-beta.2"
+version = "0.50.0-beta.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68c8603d5f3761e349246d347aa1d9185f5eabc71f02f5e6dd7c811b009bb4b8"
+checksum = "6f223659bbd8148f9c0acdc9c2f6d084337b919e747a686abcfd552f6a69ede5"
 dependencies = [
  "aes",
  "async-trait",
