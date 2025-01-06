@@ -35,12 +35,17 @@ export interface TCPChannelOpenEvent {
 
 
 export type KeyboardInteractiveAuthenticationState = {
-    state: 'failure',
+    state: 'failure'
+    remainingMethods: string[]
 } | {
     state: 'infoRequest'
     name: string
     instructions: string
     prompts: () => KeyboardInteractiveAuthenticationPrompt[]
+}
+
+export interface AuthFailure {
+    remainingMethods: string[]
 }
 
 export interface Config {
@@ -104,31 +109,31 @@ export class SSHClient extends Destructible {
         super.destruct()
     }
 
-    async authenticateWithPassword(username: string, password: string): Promise<AuthenticatedSSHClient | null> {
+    async authenticateWithPassword(username: string, password: string): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticatePassword(username, password)
-        if (result) {
+        if (result.success) {
             return this.intoAuthenticated()
         }
-        return null
+        return result
     }
 
-    async authenticateWithKeyPair(username: string, keyPair: KeyPair, hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): Promise<AuthenticatedSSHClient | null> {
+    async authenticateWithKeyPair(username: string, keyPair: KeyPair, hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticatePublickey(username, keyPair['inner'], hashAlgorithm ? {
             sha1: HashAlgorithm.Sha1,
             sha256: HashAlgorithm.Sha256,
             sha512: HashAlgorithm.Sha512,
         }[hashAlgorithm] : null)
-        if (result) {
+        if (result.success) {
             return this.intoAuthenticated()
         }
-        return null
+        return result
     }
 
     async startKeyboardInteractiveAuthentication(username: string): Promise<KeyboardInteractiveAuthenticationState> {
         this.assertNotDestructed()
-        return await this.client.startKeyboardInteractiveAuthentication(username) as unknown as KeyboardInteractiveAuthenticationState
+        return await this.client.startKeyboardInteractiveAuthentication(username) as KeyboardInteractiveAuthenticationState
     }
 
     async continueKeyboardInteractiveAuthentication(responses: string[]): Promise<AuthenticatedSSHClient | KeyboardInteractiveAuthenticationState> {
@@ -137,7 +142,7 @@ export class SSHClient extends Destructible {
         if (result.state === 'success') {
             return this.intoAuthenticated()
         }
-        return result as unknown as KeyboardInteractiveAuthenticationState
+        return result as KeyboardInteractiveAuthenticationState
     }
 
     async authenticateWithAgent(

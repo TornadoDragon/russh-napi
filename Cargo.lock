@@ -539,6 +539,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "enum_dispatch"
+version = "0.3.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa18ce2bc66555b3218614519ac839ddb759a7d6720732f979ef8d13be147ecd"
+dependencies = [
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "env_logger"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -821,12 +833,13 @@ dependencies = [
 
 [[package]]
 name = "internal-russh-forked-ssh-key"
-version = "0.6.7-internal.4"
+version = "0.6.9+upstream-0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e38081ccec4be2cf4fa50de38a1797129a3b262ab822f1731cd83cb35fa799ae"
+checksum = "fb5af01d366561582e9ea5f841837cc1d8e37e7142a32f33a43801e81863cba5"
 dependencies = [
  "argon2",
  "bcrypt-pbkdf",
+ "ecdsa",
  "ed25519-dalek",
  "hex",
  "hmac",
@@ -1135,13 +1148,14 @@ dependencies = [
 
 [[package]]
 name = "pageant"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "032d6201d2fb765158455ae0d5a510c016bb6da7232e5040e39e9c8db12b0afc"
+checksum = "2c6f0e349ea8dea1b50aa17c082777d30df133d89898c7568a615354772d3731"
 dependencies = [
  "bytes",
  "delegate 0.13.1",
  "futures",
+ "log",
  "rand",
  "thiserror",
  "tokio",
@@ -1408,9 +1422,9 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.0-beta.3"
+version = "0.50.0-beta.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf18eb8323cc34c943890dc73d4fea8e76378bae4e21f151165a2de04d516c70"
+checksum = "92b23d89ffb0101397e5ec411ec2bed48157da3a69d1cc05886df6a1eccccade"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -1425,6 +1439,7 @@ dependencies = [
  "delegate 0.13.1",
  "digest",
  "elliptic-curve",
+ "enum_dispatch",
  "flate2",
  "futures",
  "generic-array",
@@ -1466,9 +1481,9 @@ dependencies = [
 
 [[package]]
 name = "russh-keys"
-version = "0.50.0-beta.3"
+version = "0.50.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f223659bbd8148f9c0acdc9c2f6d084337b919e747a686abcfd552f6a69ede5"
+checksum = "008f62459545c4194b6035d96011bff984203cb135bf0170bcf48494d7210ff5"
 dependencies = [
  "aes",
  "async-trait",

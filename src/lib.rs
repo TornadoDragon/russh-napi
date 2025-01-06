@@ -10,8 +10,8 @@ use key::{SshKeyPair, SshPublicKey};
 use napi::bindgen_prelude::{Promise, Uint8Array};
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
-use russh::client::DisconnectReason;
-use russh::ChannelId;
+use russh::client::{AuthResult, DisconnectReason};
+use russh::{ChannelId, MethodSet};
 use russh_keys::key::PrivateKeyWithHashAlg;
 use russh_sftp::client::SftpSession;
 use sftp::SftpChannel;
@@ -241,6 +241,7 @@ pub struct KeyboardInteractiveAuthenticationState {
     pub state: String,
     pub name: Option<String>,
     pub instructions: Option<String>,
+    pub remaining_methods: Vec<String>,
     prompts: Option<Vec<KeyboardInteractiveAuthenticationPrompt>>,
 }
 
@@ -260,15 +261,17 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
             russh::client::KeyboardInteractiveAuthResponse::Success => {
                 KeyboardInteractiveAuthenticationState {
                     state: "success".into(),
+                    remaining_methods: vec![],
                     instructions: None,
                     prompts: None,
                     name: None,
                 }
             }
-            russh::client::KeyboardInteractiveAuthResponse::Failure => {
+            russh::client::KeyboardInteractiveAuthResponse::Failure { remaining_methods } => {
                 KeyboardInteractiveAuthenticationState {
                     state: "failure".into(),
                     instructions: None,
+                    remaining_methods: remaining_methods.into_iter().map(|x| x.into()).collect(),
                     prompts: None,
                     name: None,
                 }
@@ -280,8 +283,29 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
             } => KeyboardInteractiveAuthenticationState {
                 state: "infoRequest".to_string(),
                 name: Some(name),
+                remaining_methods: vec![],
                 instructions: Some(instructions),
                 prompts: Some(prompts.into_iter().map(Into::into).collect()),
+            },
+        }
+    }
+}
+
+#[napi]
+pub struct SshAuthResult {
+    pub success: bool,
+    pub remaining_methods: Vec<String>,
+}
+
+impl From<AuthResult> for SshAuthResult {
+    fn from(r: AuthResult) -> Self {
+        SshAuthResult {
+            success: r.success(),
+            remaining_methods: match r {
+                AuthResult::Success => vec![],
+                AuthResult::Failure { remaining_methods } => {
+                    remaining_methods.into_iter().map(|x| x.into()).collect()
+                }
             },
         }
     }
@@ -299,13 +323,14 @@ impl SshClient {
         &self,
         username: String,
         password: String,
-    ) -> napi::Result<bool> {
+    ) -> napi::Result<SshAuthResult> {
         let mut handle = self.handle.lock().await;
         handle
             .authenticate_password(username, password)
             .await
             .map_err(WrappedError::from)
             .map_err(Into::into)
+            .map(Into::into)
     }
 
     #[napi]
@@ -314,8 +339,9 @@ impl SshClient {
         username: String,
         key: &SshKeyPair,
         hash_algorithm: Option<HashAlgorithm>,
-    ) -> napi::Result<bool> {
-        let mut handle = self.handle.lock().await;
+    ) -> napi::Result<SshAuthResult> {
+        let mut handle: tokio::sync::MutexGuard<'_, russh::client::Handle<SSHClientHandler>> =
+            self.handle.lock().await;
         handle
             .authenticate_publickey(
                 username,
@@ -328,6 +354,7 @@ impl SshClient {
             .await
             .map_err(WrappedError::from)
             .map_err(Into::into)
+            .map(Into::into)
     }
 
     #[napi]
@@ -367,7 +394,7 @@ impl SshClient {
         &self,
         username: String,
         connection: &AgentConnection,
-    ) -> napi::Result<bool> {
+    ) -> napi::Result<SshAuthResult> {
         let mut handle = self.handle.lock().await;
 
         let mut agent = get_agent_client(connection).await?;
@@ -376,17 +403,23 @@ impl SshClient {
             .request_identities()
             .await
             .map_err(WrappedError::from)?;
+
+        let mut last_auth_result = AuthResult::Failure {
+            remaining_methods: MethodSet::empty(),
+        };
+
         for key in keys {
             let result = handle
                 .authenticate_publickey_with(&username, key, &mut agent)
                 .await;
             let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
-            if ret {
-                return Ok(true);
+            if ret.success() {
+                return Ok(ret.into());
             }
+            last_auth_result = ret;
         }
 
-        Ok(false)
+        Ok(last_auth_result.into())
     }
 
     #[napi]
