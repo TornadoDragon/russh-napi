@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::io::IoSlice;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -15,6 +16,7 @@ use tokio_socks::tcp::Socks5Stream;
 use crate::channel::SshChannel;
 
 #[napi]
+#[derive(Debug)]
 pub struct SshTransport(Arc<Mutex<Option<SshTransportInner>>>);
 
 pub(crate) enum SshTransportInner {
@@ -22,6 +24,17 @@ pub(crate) enum SshTransportInner {
     Command(Child),
     SshChannel(russh::ChannelStream<russh::client::Msg>),
     SocksProxy(tokio_socks::tcp::socks5::Socks5Stream<TcpStream>),
+}
+
+impl Debug for SshTransportInner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SshTransportInner::Socket(_) => f.debug_struct("Socket").finish(),
+            SshTransportInner::Command(_) => f.debug_struct("Command").finish(),
+            SshTransportInner::SshChannel(_) => f.debug_struct("SshChannel").finish(),
+            SshTransportInner::SocksProxy(_) => f.debug_struct("SocksProxy").finish(),
+        }
+    }
 }
 
 impl Drop for SshTransportInner {

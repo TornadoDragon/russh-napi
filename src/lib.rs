@@ -7,7 +7,9 @@ use std::time::Duration;
 use async_trait::async_trait;
 use channel::SshChannel;
 use key::{SshKeyPair, SshPublicKey};
+use log::debug;
 use napi::bindgen_prelude::{Promise, Uint8Array};
+use napi::module_init;
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
@@ -31,6 +33,12 @@ pub use key::is_pageant_running;
 pub use key::parse_key;
 pub use key::HashAlgorithm;
 use transport::SshTransport;
+
+#[module_init]
+fn init() {
+    env_logger::init();
+    debug!("russh-napi initialized");
+}
 
 pub struct SSHClientHandler {
     pub server_key_callback: ThreadsafeFunction<SshPublicKey, Promise<bool>>,
@@ -271,7 +279,7 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
                 KeyboardInteractiveAuthenticationState {
                     state: "failure".into(),
                     instructions: None,
-                    remaining_methods: remaining_methods.into_iter().map(|x| x.into()).collect(),
+                    remaining_methods: remaining_methods.iter().map(|x| x.into()).collect(),
                     prompts: None,
                     name: None,
                 }
@@ -304,7 +312,7 @@ impl From<AuthResult> for SshAuthResult {
             remaining_methods: match r {
                 AuthResult::Success => vec![],
                 AuthResult::Failure { remaining_methods } => {
-                    remaining_methods.into_iter().map(|x| x.into()).collect()
+                    remaining_methods.iter().map(|x| x.into()).collect()
                 }
             },
         }
@@ -382,10 +390,6 @@ impl SshClient {
             .await
             .map_err(WrappedError::from)
             .map_err(Into::into)
-            .map(|x| {
-                dbg!(&x);
-                x
-            })
             .map(Into::into)
     }
 
@@ -518,6 +522,8 @@ pub async fn connect(
     agent_channel_open_callback: ThreadsafeFunction<SshChannel>,
     banner_callback: ThreadsafeFunction<String>,
 ) -> napi::Result<SshClient> {
+    debug!("russh-napi connecting to {transport:?}");
+
     let handler = SSHClientHandler {
         server_key_callback,
         data_callback,
