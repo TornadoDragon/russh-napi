@@ -2,12 +2,56 @@ use std::sync::Arc;
 
 use napi::bindgen_prelude::Uint8Array;
 use napi_derive::napi;
+use russh_sftp::client::SftpSession;
 use tokio::sync::oneshot;
 use tokio::sync::Mutex;
 
 use crate::error::WrappedError;
+use crate::sftp::SftpChannel;
 
 type ChannelType = russh::Channel<russh::client::Msg>;
+
+#[napi]
+pub struct NewSshChannel(Arc<Mutex<Option<ChannelType>>>);
+
+impl From<ChannelType> for NewSshChannel {
+    fn from(ch: ChannelType) -> Self {
+        NewSshChannel(Arc::new(Mutex::new(Some(ch))))
+    }
+}
+
+#[napi]
+impl NewSshChannel {
+    pub async fn take(&self) -> Option<ChannelType> {
+        self.0.lock().await.take()
+    }
+
+    #[napi]
+    pub async fn activate(&self) -> napi::Result<SshChannel> {
+        match self.0.lock().await.take() {
+            Some(ch) => Ok(ch.into()),
+            None => Err(napi::Error::new(
+                napi::Status::GenericFailure,
+                "Channel is already consumed",
+            )),
+        }
+    }
+
+    #[napi]
+    pub async fn activate_sftp(&self) -> napi::Result<SftpChannel> {
+        let ch = self.take().await.ok_or_else(|| {
+            napi::Error::new(napi::Status::GenericFailure, "Channel is already consumed")
+        })?;
+        ch.request_subsystem(true, "sftp")
+            .await
+            .map_err(WrappedError::from)?;
+        let id = ch.id();
+        let sftp = SftpSession::new(ch.into_stream())
+            .await
+            .map_err(WrappedError::from)?;
+        Ok(SftpChannel::new(id.into(), sftp))
+    }
+}
 
 #[napi]
 pub struct SshChannel {

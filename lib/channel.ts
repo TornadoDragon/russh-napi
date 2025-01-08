@@ -3,6 +3,19 @@ import { Observable, filter, map } from 'rxjs'
 import { Destructible } from './helpers'
 import { ClientEventInterface } from './events'
 
+export class NewChannel {
+    constructor (private inner: russh.NewSshChannel | null) {}
+
+    take (): russh.NewSshChannel {
+        if (this.inner === null) {
+            throw new Error('Channel already taken')
+        }
+        const inner = this.inner
+        this.inner = null
+        return inner
+    }
+}
+
 export interface PTYSize {
     columns: number,
     rows: number,

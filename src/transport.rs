@@ -13,7 +13,7 @@ use tokio::process::Child;
 use tokio::sync::Mutex;
 use tokio_socks::tcp::Socks5Stream;
 
-use crate::channel::SshChannel;
+use crate::channel::{NewSshChannel, SshChannel};
 
 #[napi]
 #[derive(Debug)]
@@ -78,7 +78,7 @@ impl SshTransport {
     }
 
     #[napi]
-    pub async fn new_ssh_channel(channel: &SshChannel) -> napi::Result<SshTransport> {
+    pub async fn new_ssh_channel(channel: &NewSshChannel) -> napi::Result<SshTransport> {
         let Some(handle) = channel.take().await else {
             return Err(napi::Error::new(
                 napi::Status::GenericFailure,

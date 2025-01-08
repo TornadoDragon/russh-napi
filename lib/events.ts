@@ -7,9 +7,9 @@ export class ClientEventInterface {
     eof$ = new Subject<number>()
     close$ = new Subject<number>()
     disconnect$ = new Subject<void>()
-    x11ChannelOpen$ = new Subject<[russh.SshChannel, string, number]>()
-    tcpChannelOpen$ = new Subject<[russh.SshChannel, string, number, string, number]>()
-    agentChannelOpen$ = new Subject<[russh.SshChannel]>()
+    x11ChannelOpen$ = new Subject<[russh.NewSshChannel, string, number]>()
+    tcpChannelOpen$ = new Subject<[russh.NewSshChannel, string, number, string, number]>()
+    agentChannelOpen$ = new Subject<[russh.NewSshChannel]>()
     banner$ = new AsyncSubject<string>()
 
     complete () {
@@ -44,15 +44,15 @@ export class ClientEventInterface {
         this.disconnect$.next()
     }
 
-    x11ChannelOpenCallback = (_: unknown, channel: russh.SshChannel, address: string, port: number) => {
+    x11ChannelOpenCallback = (_: unknown, channel: russh.NewSshChannel, address: string, port: number) => {
         this.x11ChannelOpen$.next([channel, address, port])
     }
 
-    tcpChannelOpenCallback = (_: unknown, channel: russh.SshChannel, connectedAddress: string, connectedPort: number, originatorAddress: string, originatorPort: number) => {
+    tcpChannelOpenCallback = (_: unknown, channel: russh.NewSshChannel, connectedAddress: string, connectedPort: number, originatorAddress: string, originatorPort: number) => {
         this.tcpChannelOpen$.next([channel, connectedAddress, connectedPort, originatorAddress, originatorPort])
     }
 
-    agentChannelOpenCallback = (_: unknown, channel: russh.SshChannel) => {
+    agentChannelOpenCallback = (_: unknown, channel: russh.NewSshChannel) => {
         this.agentChannelOpen$.next([channel])
     }
 

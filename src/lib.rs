@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use async_trait::async_trait;
-use channel::SshChannel;
+use channel::{NewSshChannel, SshChannel};
 use key::{SshKeyPair, SshPublicKey};
 use log::debug;
 use napi::bindgen_prelude::{Promise, Uint8Array};
@@ -15,8 +15,6 @@ use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
 use russh::{ChannelId, MethodSet};
 use russh_keys::key::PrivateKeyWithHashAlg;
-use russh_sftp::client::SftpSession;
-use sftp::SftpChannel;
 use tokio::sync::Mutex;
 
 use error::WrappedError;
@@ -47,9 +45,9 @@ pub struct SSHClientHandler {
     pub eof_callback: ThreadsafeFunction<u32>,
     pub close_callback: ThreadsafeFunction<u32>,
     pub disconnect_callback: ThreadsafeFunction<Option<napi::Error>>,
-    pub x11_channel_open_callback: ThreadsafeFunction<(SshChannel, String, u32)>,
-    pub tcpip_channel_open_callback: ThreadsafeFunction<(SshChannel, String, u32, String, u32)>,
-    pub agent_channel_open_callback: ThreadsafeFunction<SshChannel>,
+    pub x11_channel_open_callback: ThreadsafeFunction<(NewSshChannel, String, u32)>,
+    pub tcpip_channel_open_callback: ThreadsafeFunction<(NewSshChannel, String, u32, String, u32)>,
+    pub agent_channel_open_callback: ThreadsafeFunction<NewSshChannel>,
     pub banner_callback: ThreadsafeFunction<String>,
 }
 
@@ -427,7 +425,7 @@ impl SshClient {
     }
 
     #[napi]
-    pub async fn channel_open_session(&self) -> napi::Result<SshChannel> {
+    pub async fn channel_open_session(&self) -> napi::Result<NewSshChannel> {
         let handle = self.handle.lock().await;
         let ch = handle
             .channel_open_session()
@@ -463,30 +461,13 @@ impl SshClient {
         port: u32,
         originator_address: String,
         originator_port: u32,
-    ) -> napi::Result<SshChannel> {
+    ) -> napi::Result<NewSshChannel> {
         let handle = self.handle.lock().await;
         let ch = handle
             .channel_open_direct_tcpip(address, port, originator_address, originator_port)
             .await
             .map_err(WrappedError::from)?;
         Ok(ch.into())
-    }
-
-    #[napi]
-    pub async fn channel_open_sftp(&self) -> napi::Result<SftpChannel> {
-        let handle = self.handle.lock().await;
-        let ch = handle
-            .channel_open_session()
-            .await
-            .map_err(WrappedError::from)?;
-        ch.request_subsystem(true, "sftp")
-            .await
-            .map_err(WrappedError::from)?;
-        let id = ch.id();
-        let sftp = SftpSession::new(ch.into_stream())
-            .await
-            .map_err(WrappedError::from)?;
-        Ok(SftpChannel::new(id.into(), sftp))
     }
 
     #[napi]
@@ -517,9 +498,9 @@ pub async fn connect(
     eof_callback: ThreadsafeFunction<u32>,
     close_callback: ThreadsafeFunction<u32>,
     disconnect_callback: ThreadsafeFunction<Option<napi::Error>>,
-    x11_channel_open_callback: ThreadsafeFunction<(SshChannel, String, u32)>,
-    tcpip_channel_open_callback: ThreadsafeFunction<(SshChannel, String, u32, String, u32)>,
-    agent_channel_open_callback: ThreadsafeFunction<SshChannel>,
+    x11_channel_open_callback: ThreadsafeFunction<(NewSshChannel, String, u32)>,
+    tcpip_channel_open_callback: ThreadsafeFunction<(NewSshChannel, String, u32, String, u32)>,
+    agent_channel_open_callback: ThreadsafeFunction<NewSshChannel>,
     banner_callback: ThreadsafeFunction<String>,
 ) -> napi::Result<SshClient> {
     debug!("russh-napi connecting to {transport:?}");

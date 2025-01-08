@@ -1,7 +1,7 @@
-import { Observable, mergeMap, from } from 'rxjs'
+import { Observable, map } from 'rxjs'
 import { Destructible } from './helpers'
 import { SFTP } from './sftp'
-import { Channel } from './channel'
+import { Channel, NewChannel } from './channel'
 import { ClientEventInterface } from './events'
 
 import russh, { SshKeyPair, KeyboardInteractiveAuthenticationPrompt, SshClient, SshChannel, SshPublicKey, SshTransport, HashAlgorithm } from './native'
@@ -20,13 +20,13 @@ export class KeyPair {
 }
 
 export interface X11ChannelOpenEvent {
-    readonly channel: Channel
+    readonly channel: NewChannel
     readonly clientAddress: string
     readonly clientPort: number
 }
 
 export interface TCPChannelOpenEvent {
-    readonly channel: Channel
+    readonly channel: NewChannel
     readonly targetAddress: string
     readonly targetPort: number
     readonly clientAddress: string
@@ -174,42 +174,35 @@ export class SSHClient extends Destructible {
 export class AuthenticatedSSHClient extends Destructible {
     readonly disconnect$: Observable<void> = this.events.disconnect$
     readonly x11ChannelOpen$: Observable<X11ChannelOpenEvent> =
-        this.events.x11ChannelOpen$.pipe(mergeMap(([ch, address, port]) =>
-            from(this.wrapChannel(ch).then(channel => ({
-                channel,
-                clientAddress: address,
-                clientPort: port,
-            })))))
+        this.events.x11ChannelOpen$.pipe(map(([ch, address, port]) => ({
+            channel: new NewChannel(ch),
+            clientAddress: address,
+            clientPort: port,
+        })))
 
-    readonly tcpChannelOpen$: Observable<TCPChannelOpenEvent> = this.events.tcpChannelOpen$.pipe(mergeMap(([
+    readonly tcpChannelOpen$: Observable<TCPChannelOpenEvent> = this.events.tcpChannelOpen$.pipe(map(([
         ch,
         targetAddress,
         targetPort,
         clientAddress,
         clientPort,
-    ]) =>
-        from(this.wrapChannel(ch).then(channel => ({
-            channel,
-            targetAddress,
-            targetPort,
-            clientAddress,
-            clientPort,
-        })))))
+    ]) => ({
+        channel: new NewChannel(ch),
+        targetAddress,
+        targetPort,
+        clientAddress,
+        clientPort,
+    })))
 
-    readonly agentChannelOpen$: Observable<Channel> = this.events.agentChannelOpen$.pipe(mergeMap(([ch]) =>
-        from(this.wrapChannel(ch))))
+    readonly agentChannelOpen$: Observable<NewChannel> = this.events.agentChannelOpen$.pipe(map(([ch]) => new NewChannel(ch)))
 
     constructor(
         private client: SshClient,
         private events: ClientEventInterface,
     ) { super() }
 
-    async openSessionChannel(): Promise<Channel> {
-        return await this.wrapChannel(await this.client.channelOpenSession())
-    }
-
-    async openSFTPChannel(): Promise<SFTP> {
-        return new SFTP(await this.client.channelOpenSftp(), this.events)
+    async openSessionChannel(): Promise<NewChannel> {
+        return await new NewChannel(await this.client.channelOpenSession())
     }
 
     async openTCPForwardChannel(options: {
@@ -217,8 +210,8 @@ export class AuthenticatedSSHClient extends Destructible {
         portToConnectTo: number,
         originatorAddress: string,
         originatorPort: number,
-    }): Promise<Channel> {
-        return await this.wrapChannel(await this.client.channelOpenDirectTcpip(
+    }): Promise<NewChannel> {
+        return new NewChannel(await this.client.channelOpenDirectTcpip(
             options.addressToConnectTo,
             options.portToConnectTo,
             options.originatorAddress,
@@ -251,6 +244,16 @@ export class AuthenticatedSSHClient extends Destructible {
         await this.client.disconnect()
     }
 
+    async activateChannel (ch: NewChannel): Promise<Channel> {
+        let channel = await ch.take().activate()
+        return this.wrapChannel(channel)
+    }
+
+    async activateSFTP (ch: NewChannel): Promise<SFTP> {
+        let channel = await ch.take().activateSftp()
+        return new SFTP(channel, this.events)
+    }
+
     private async wrapChannel(channel: SshChannel): Promise<Channel> {
         let id = await channel.id()
         return new Channel(id, channel, this.events)
@@ -262,6 +265,7 @@ export {
     SshPublicKey,
     SshTransport,
     SshChannel,
+    NewSshChannel,
     SftpFileType as SFTPFileType,
     supportedCiphers as getSupportedCiphers,
     supportedKexAlgorithms as getSupportedKexAlgorithms,
@@ -277,4 +281,4 @@ export {
     SFTP, SFTPDirectoryEntry, SFTPMetadata,
 } from './sftp'
 export { AgentConnectionSpec, SSHAgentStream } from './agent'
-export { Channel }
+export { Channel, NewChannel }
