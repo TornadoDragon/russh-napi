@@ -411,6 +411,7 @@ impl SshClient {
         };
 
         for key in keys {
+            debug!("Trying key {key:?}");
             let result = handle
                 .authenticate_publickey_with(&username, key, &mut agent)
                 .await;

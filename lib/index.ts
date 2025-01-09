@@ -154,7 +154,7 @@ export class SSHClient extends Destructible {
             username,
             makeRusshAgentConnection(connection),
         )
-        if (result) {
+        if (result.success) {
             return this.intoAuthenticated()
         }
         return null

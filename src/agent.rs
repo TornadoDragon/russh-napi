@@ -10,7 +10,7 @@ use tokio::sync::Mutex;
 use crate::error::WrappedError;
 
 #[napi]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum AgentConnectionKind {
     Pageant,
     Pipe,
@@ -18,7 +18,7 @@ pub enum AgentConnectionKind {
 }
 
 #[napi]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AgentConnection {
     pub kind: AgentConnectionKind,
     pub path: Option<String>,
