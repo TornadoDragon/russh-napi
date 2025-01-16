@@ -127,13 +127,17 @@ export class SSHClient extends Destructible {
         return result
     }
 
-    async authenticateWithKeyPair(username: string, keyPair: KeyPair, hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): Promise<AuthenticatedSSHClient | AuthFailure> {
-        this.assertNotDestructed()
-        const result = await this.client.authenticatePublickey(username, keyPair['inner'], hashAlgorithm ? {
+    private _hashAlg (hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): HashAlgorithm | null {
+        return hashAlgorithm ? {
             sha1: HashAlgorithm.Sha1,
             sha256: HashAlgorithm.Sha256,
             sha512: HashAlgorithm.Sha512,
-        }[hashAlgorithm] : null)
+        }[hashAlgorithm] : null
+    }
+
+    async authenticateWithKeyPair(username: string, keyPair: KeyPair, hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null): Promise<AuthenticatedSSHClient | AuthFailure> {
+        this.assertNotDestructed()
+        const result = await this.client.authenticatePublickey(username, keyPair['inner'], this._hashAlg(hashAlgorithm))
         if (result.success) {
             return this.intoAuthenticated()
         }
@@ -157,11 +161,13 @@ export class SSHClient extends Destructible {
     async authenticateWithAgent(
         username: string,
         connection: AgentConnectionSpec,
+        hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null,
     ): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticateAgent(
             username,
             makeRusshAgentConnection(connection),
+            this._hashAlg(hashAlgorithm),
         )
         if (result.success) {
             return this.intoAuthenticated()

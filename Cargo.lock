@@ -1149,20 +1149,6 @@ dependencies = [
 [[package]]
 name = "pageant"
 version = "0.0.2"
-dependencies = [
- "bytes",
- "delegate 0.13.1",
- "futures",
- "log",
- "rand",
- "thiserror",
- "tokio",
- "windows",
-]
-
-[[package]]
-name = "pageant"
-version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c6f0e349ea8dea1b50aa17c082777d30df133d89898c7568a615354772d3731"
 dependencies = [
@@ -1437,6 +1423,8 @@ dependencies = [
 [[package]]
 name = "russh"
 version = "0.50.0-beta.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d60065431b3bfb418ed6e9bbbf0893afb06691d73863c9b1217f1ec11ebc6bac"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -1473,7 +1461,7 @@ dependencies = [
  "p256",
  "p384",
  "p521",
- "pageant 0.0.2",
+ "pageant",
  "pbkdf2",
  "pkcs1",
  "pkcs5",
@@ -1501,6 +1489,8 @@ dependencies = [
 [[package]]
 name = "russh-cryptovec"
 version = "0.48.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4d8e7e854e1a87e4be00fa287c98cad23faa064d0464434beaa9f014ec3baa98"
 dependencies = [
  "libc",
  "ssh-encoding",
@@ -1520,7 +1510,7 @@ dependencies = [
  "napi",
  "napi-build 1.2.1",
  "napi-derive",
- "pageant 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pageant",
  "russh",
  "russh-sftp",
  "thiserror",
@@ -1549,6 +1539,8 @@ dependencies = [
 [[package]]
 name = "russh-util"
 version = "0.48.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92c7dd577958c0cefbc8f8a2c05c48c88c42e2fdb760dbe9b96ae31d4de97a1f"
 dependencies = [
  "chrono",
  "tokio",

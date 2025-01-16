@@ -4,7 +4,7 @@ use napi_derive::napi;
 use russh::keys::{HashAlg, PublicKeyBase64};
 
 #[napi]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum HashAlgorithm {
     Sha1,
     Sha256,
