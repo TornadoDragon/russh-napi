@@ -14,7 +14,7 @@ use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
 use russh::keys::key::PrivateKeyWithHashAlg;
-use russh::keys::HashAlg;
+use russh::keys::{Algorithm, HashAlg};
 use russh::{ChannelId, MethodSet};
 use tokio::sync::Mutex;
 
@@ -408,7 +408,6 @@ impl SshClient {
         &self,
         username: String,
         connection: &AgentConnection,
-        hash_algorithm: Option<HashAlgorithm>,
     ) -> napi::Result<SshAuthResult> {
         let mut handle = self.handle.lock().await;
 
@@ -425,19 +424,20 @@ impl SshClient {
 
         for key in keys {
             debug!("Trying key {key:?}");
-            let result = handle
-                .authenticate_publickey_with(
-                    &username,
-                    key,
-                    hash_algorithm.and_then(Into::into),
-                    &mut agent,
-                )
-                .await;
-            let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
-            if ret.success() {
-                return Ok(ret.into());
+            let possible_hashes = match key.algorithm() {
+                Algorithm::Rsa { .. } => &[Some(HashAlg::Sha512), Some(HashAlg::Sha256), None][..],
+                _ => &[None][..],
+            };
+            for hash_alg in possible_hashes {
+                let result = handle
+                    .authenticate_publickey_with(&username, key.clone(), *hash_alg, &mut agent)
+                    .await;
+                let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
+                if ret.success() {
+                    return Ok(ret.into());
+                }
+                last_auth_result = ret;
             }
-            last_auth_result = ret;
         }
 
         Ok(last_auth_result.into())

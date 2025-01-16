@@ -161,13 +161,11 @@ export class SSHClient extends Destructible {
     async authenticateWithAgent(
         username: string,
         connection: AgentConnectionSpec,
-        hashAlgorithm: 'sha1' | 'sha256' | 'sha512' | null,
     ): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticateAgent(
             username,
             makeRusshAgentConnection(connection),
-            this._hashAlg(hashAlgorithm),
         )
         if (result.success) {
             return this.intoAuthenticated()
