@@ -109,6 +109,15 @@ export class SSHClient extends Destructible {
         super.destruct()
     }
 
+    async authenticateNone(username: string): Promise<AuthenticatedSSHClient | AuthFailure> {
+        this.assertNotDestructed()
+        const result = await this.client.authenticateNone(username)
+        if (result.success) {
+            return this.intoAuthenticated()
+        }
+        return result
+    }
+
     async authenticateWithPassword(username: string, password: string): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticatePassword(username, password)

@@ -325,6 +325,20 @@ pub struct SshClient {
 #[napi]
 impl SshClient {
     #[napi]
+    pub async fn authenticate_none(
+        &self,
+        username: String,
+    ) -> napi::Result<SshAuthResult> {
+        let mut handle = self.handle.lock().await;
+        handle
+            .authenticate_none(username)
+            .await
+            .map_err(WrappedError::from)
+            .map_err(Into::into)
+            .map(Into::into)
+    }
+
+    #[napi]
     pub async fn authenticate_password(
         &self,
         username: String,
