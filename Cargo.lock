@@ -1149,6 +1149,20 @@ dependencies = [
 [[package]]
 name = "pageant"
 version = "0.0.2"
+dependencies = [
+ "bytes",
+ "delegate 0.13.1",
+ "futures",
+ "log",
+ "rand",
+ "thiserror",
+ "tokio",
+ "windows",
+]
+
+[[package]]
+name = "pageant"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c6f0e349ea8dea1b50aa17c082777d30df133d89898c7568a615354772d3731"
 dependencies = [
@@ -1422,116 +1436,75 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.0-beta.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a9e8eca8c96bb7a17788b984ce5d5e304c2c05b77f000f02b736f2422ef1070"
+version = "0.50.0-beta.10"
 dependencies = [
  "aes",
  "aes-gcm",
  "async-trait",
  "bitflags",
+ "block-padding",
  "byteorder",
  "bytes",
  "cbc",
  "chacha20",
  "ctr",
  "curve25519-dalek",
- "delegate 0.13.1",
- "digest",
- "elliptic-curve",
- "enum_dispatch",
- "flate2",
- "futures",
- "generic-array",
- "hex-literal",
- "hmac",
- "internal-russh-forked-ssh-key",
- "log",
- "num-bigint",
- "once_cell",
- "p256",
- "p384",
- "p521",
- "poly1305",
- "rand",
- "rand_core",
- "rsa",
- "russh-cryptovec",
- "russh-keys",
- "russh-util",
- "sha1",
- "sha2",
- "signature",
- "ssh-encoding",
- "subtle",
- "thiserror",
- "tokio",
-]
-
-[[package]]
-name = "russh-cryptovec"
-version = "0.48.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d8e7e854e1a87e4be00fa287c98cad23faa064d0464434beaa9f014ec3baa98"
-dependencies = [
- "libc",
- "ssh-encoding",
- "winapi",
-]
-
-[[package]]
-name = "russh-keys"
-version = "0.50.0-beta.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cab59c210761d61033340a3c72dd6983db1eb27769659351d566bdde9fa8d620"
-dependencies = [
- "aes",
- "async-trait",
- "block-padding",
- "byteorder",
- "bytes",
- "cbc",
- "ctr",
  "data-encoding",
+ "delegate 0.13.1",
  "der",
  "digest",
  "ecdsa",
  "ed25519-dalek",
  "elliptic-curve",
+ "enum_dispatch",
+ "flate2",
  "futures",
+ "generic-array",
  "getrandom",
+ "hex-literal",
  "hmac",
  "home",
  "inout",
  "internal-russh-forked-ssh-key",
  "log",
  "md5",
- "num-integer",
+ "num-bigint",
+ "once_cell",
  "p256",
  "p384",
  "p521",
- "pageant",
+ "pageant 0.0.2",
  "pbkdf2",
  "pkcs1",
  "pkcs5",
  "pkcs8",
+ "poly1305",
  "rand",
  "rand_core",
  "rsa",
  "russh-cryptovec",
  "russh-util",
  "sec1",
- "serde",
  "sha1",
  "sha2",
  "signature",
  "spki",
  "ssh-encoding",
+ "subtle",
  "thiserror",
  "tokio",
  "tokio-stream",
  "typenum",
  "zeroize",
+]
+
+[[package]]
+name = "russh-cryptovec"
+version = "0.48.0"
+dependencies = [
+ "libc",
+ "ssh-encoding",
+ "winapi",
 ]
 
 [[package]]
@@ -1547,9 +1520,8 @@ dependencies = [
  "napi",
  "napi-build 1.2.1",
  "napi-derive",
- "pageant",
+ "pageant 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "russh",
- "russh-keys",
  "russh-sftp",
  "thiserror",
  "tokio",
@@ -1577,8 +1549,6 @@ dependencies = [
 [[package]]
 name = "russh-util"
 version = "0.48.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92c7dd577958c0cefbc8f8a2c05c48c88c42e2fdb760dbe9b96ae31d4de97a1f"
 dependencies = [
  "chrono",
  "tokio",

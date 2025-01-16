@@ -10,7 +10,7 @@ pub enum WrappedError {
     Russh(#[from] russh::Error),
 
     #[error(transparent)]
-    RusshKeys(#[from] russh_keys::Error),
+    RusshKeys(#[from] russh::keys::Error),
 
     #[error(transparent)]
     AgentAuthError(#[from] AgentAuthError),

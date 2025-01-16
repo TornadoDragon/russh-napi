@@ -1,7 +1,7 @@
 use crate::error::WrappedError;
 use napi::bindgen_prelude::Uint8Array;
 use napi_derive::napi;
-use russh_keys::{HashAlg, PublicKeyBase64};
+use russh::keys::{HashAlg, PublicKeyBase64};
 
 #[napi]
 #[derive(Clone)]
@@ -24,7 +24,7 @@ impl From<HashAlgorithm> for Option<HashAlg> {
 #[napi]
 #[derive(Clone)]
 pub struct SshPublicKey {
-    inner: russh_keys::PublicKey,
+    inner: russh::keys::PublicKey,
 }
 
 #[napi]
@@ -50,8 +50,8 @@ impl SshPublicKey {
     }
 }
 
-impl From<russh_keys::PublicKey> for SshPublicKey {
-    fn from(inner: russh_keys::PublicKey) -> Self {
+impl From<russh::keys::PublicKey> for SshPublicKey {
+    fn from(inner: russh::keys::PublicKey) -> Self {
         SshPublicKey { inner }
     }
 }
@@ -59,7 +59,7 @@ impl From<russh_keys::PublicKey> for SshPublicKey {
 #[napi]
 #[derive(Clone)]
 pub struct SshKeyPair {
-    pub(crate) inner: russh_keys::PrivateKey,
+    pub(crate) inner: russh::keys::PrivateKey,
 }
 
 #[napi]
@@ -72,7 +72,7 @@ impl SshKeyPair {
 
 #[napi]
 pub fn parse_key(data: String, password: Option<String>) -> napi::Result<SshKeyPair> {
-    russh_keys::decode_secret_key(&data, password.as_deref())
+    russh::keys::decode_secret_key(&data, password.as_deref())
         .map_err(|e| WrappedError::from(russh::Error::from(e)).into())
         .map(|key| SshKeyPair { inner: key })
 }

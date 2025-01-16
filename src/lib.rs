@@ -14,7 +14,7 @@ use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
 use russh::{ChannelId, MethodSet};
-use russh_keys::key::PrivateKeyWithHashAlg;
+use russh::keys::key::PrivateKeyWithHashAlg;
 use tokio::sync::Mutex;
 
 use error::WrappedError;
@@ -85,7 +85,7 @@ pub fn supported_compression_algorithms() -> Vec<String> {
 
 #[napi]
 pub fn supported_key_types() -> Vec<String> {
-    russh_keys::key::ALL_KEY_TYPES
+    russh::keys::key::ALL_KEY_TYPES
         .iter()
         .map(|x| x.as_ref().to_string())
         .collect()
@@ -97,7 +97,7 @@ impl russh::client::Handler for SSHClientHandler {
 
     async fn check_server_key(
         &mut self,
-        server_public_key: &russh_keys::PublicKey,
+        server_public_key: &russh::keys::PublicKey,
     ) -> Result<bool, Self::Error> {
         let response = self
             .server_key_callback
@@ -550,7 +550,7 @@ pub async fn connect(
         preferred.key = Cow::Owned(
             key_algos
                 .into_iter()
-                .filter_map(|x| russh_keys::Algorithm::from_str(&x[..]).ok())
+                .filter_map(|x| russh::keys::Algorithm::from_str(&x[..]).ok())
                 .collect(),
         );
     }
@@ -589,10 +589,9 @@ pub async fn connect(
         )
         .await
         .map_err(|_| napi::Error::new(napi::Status::GenericFailure, "Connection timeout"))?
-        .map_err(WrappedError::from)?
     } else {
-        connection_fut.await.map_err(WrappedError::from)?
-    };
+        connection_fut.await
+    }?;
 
     Ok(SshClient {
         handle: Arc::new(Mutex::new(handle)),

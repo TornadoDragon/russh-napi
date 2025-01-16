@@ -157,7 +157,7 @@ export class SSHClient extends Destructible {
     async authenticateWithAgent(
         username: string,
         connection: AgentConnectionSpec,
-    ): Promise<AuthenticatedSSHClient | null> {
+    ): Promise<AuthenticatedSSHClient | AuthFailure> {
         this.assertNotDestructed()
         const result = await this.client.authenticateAgent(
             username,
@@ -166,7 +166,7 @@ export class SSHClient extends Destructible {
         if (result.success) {
             return this.intoAuthenticated()
         }
-        return null
+        return result
     }
 
     async disconnect(): Promise<void> {

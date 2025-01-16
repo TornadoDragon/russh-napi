@@ -3,7 +3,7 @@ use std::sync::Arc;
 use napi::bindgen_prelude::Uint8Array;
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
-use russh_keys::agent::client::{AgentClient, AgentStream};
+use russh::keys::agent::client::{AgentClient, AgentStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::Mutex;
 
@@ -40,7 +40,7 @@ pub async fn get_agent_client(
             #[cfg(windows)]
             return Ok(AgentClient::connect_pageant().await.dynamic());
             #[cfg(not(windows))]
-            Err(russh_keys::Error::AgentFailure.into())
+            Err(russh::keys::Error::AgentFailure.into())
         }
         AgentConnectionKind::Pipe => {
             #[cfg(windows)]
@@ -51,7 +51,7 @@ pub async fn get_agent_client(
             .map_err(WrappedError::from)?
             .dynamic());
             #[cfg(not(windows))]
-            Err(russh_keys::Error::AgentFailure.into())
+            Err(russh::keys::Error::AgentFailure.into())
         }
         AgentConnectionKind::Unix => {
             #[cfg(unix)]
@@ -62,7 +62,7 @@ pub async fn get_agent_client(
                     .dynamic(),
             );
             #[cfg(not(unix))]
-            Err(russh_keys::Error::AgentFailure.into())
+            Err(russh::keys::Error::AgentFailure.into())
         }
     }
 }
