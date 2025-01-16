@@ -70,7 +70,7 @@ struct ChannelWaiter(oneshot::Receiver<ChannelType>, oneshot::Sender<()>);
 
 impl ChannelWaiter {
     async fn inner_waiter(ch: &mut ChannelType) {
-        while let Some(_) = ch.wait().await {}
+        while ch.wait().await.is_some() {}
     }
 
     async fn waiter(
@@ -106,9 +106,11 @@ impl SshChannel {
     where
         F: AsyncFnOnce(&mut ChannelType) -> napi::Result<O>,
     {
-        let mut ch = self.take().await.expect("channel is already consumed");
+        let mut lock = self.waiter.lock().await;
+        let inner = lock.take().expect("channel is already consumed");
+        let mut ch = inner.take().await;
         let out = f(&mut ch).await?;
-        *self.waiter.lock().await = Some(ChannelWaiter::new(ch));
+        *lock = Some(ChannelWaiter::new(ch));
         Ok(out)
     }
 
