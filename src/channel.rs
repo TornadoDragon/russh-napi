@@ -109,16 +109,9 @@ impl SshChannel {
         let mut lock = self.waiter.lock().await;
         let inner = lock.take().expect("channel is already consumed");
         let mut ch = inner.take().await;
-        let out = f(&mut ch).await?;
+        let out = f(&mut ch).await;
         *lock = Some(ChannelWaiter::new(ch));
-        Ok(out)
-    }
-
-    pub async fn take(&self) -> Option<ChannelType> {
-        match self.waiter.lock().await.take() {
-            Some(x) => Some(x.take().await),
-            None => None,
-        }
+        out
     }
 
     #[napi]
