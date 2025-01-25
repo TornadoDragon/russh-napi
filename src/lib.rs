@@ -360,14 +360,18 @@ impl SshClient {
     ) -> napi::Result<SshAuthResult> {
         let mut handle: tokio::sync::MutexGuard<'_, russh::client::Handle<SSHClientHandler>> =
             self.handle.lock().await;
+        let hash_algorithm = match hash_algorithm {
+            Some(x) => x.into(),
+            None => handle
+                .best_supported_rsa_hash()
+                .await
+                .map_err(WrappedError::from)?
+                .flatten(),
+        };
         handle
             .authenticate_publickey(
                 username,
-                PrivateKeyWithHashAlg::new(
-                    Arc::new(key.inner.clone()),
-                    hash_algorithm.and_then(Into::into),
-                )
-                .map_err(WrappedError::from)?,
+                PrivateKeyWithHashAlg::new(Arc::new(key.inner.clone()), hash_algorithm),
             )
             .await
             .map_err(WrappedError::from)
