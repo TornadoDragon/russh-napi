@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use channel::{NewSshChannel, SshChannel};
+use channel::NewSshChannel;
 use key::{SshKeyPair, SshPublicKey};
 use log::debug;
 use napi::bindgen_prelude::{Promise, Uint8Array};
@@ -13,7 +13,6 @@ use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
 use russh::keys::key::PrivateKeyWithHashAlg;
-use russh::keys::{Algorithm, HashAlg};
 use russh::{ChannelId, MethodSet};
 use tokio::sync::Mutex;
 

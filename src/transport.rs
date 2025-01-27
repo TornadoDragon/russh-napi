@@ -13,7 +13,7 @@ use tokio::process::Child;
 use tokio::sync::Mutex;
 use tokio_socks::tcp::Socks5Stream;
 
-use crate::channel::{NewSshChannel, SshChannel};
+use crate::channel::NewSshChannel;
 
 #[napi]
 #[derive(Debug)]

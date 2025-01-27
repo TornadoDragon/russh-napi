@@ -18,15 +18,15 @@ russh = { version = "0.50.0-beta.12" }
 # russh = { version = "0.50.0-beta.12", path = "../russh/russh" }
 pageant = { version = "0.0.2" }
 futures = "0.3"
-thiserror = "1.0"
-delegate = "0.12.0"
+thiserror = "2.0"
+delegate = "0.13"
 russh-sftp = "2.0.2"
-env_logger = "0.10.2"
+env_logger = "0.11"
 tokio-socks = "0.5.2"
 async-http-proxy = { version = "1.2.5", features = ["runtime-tokio"] }
 
 [build-dependencies]
-napi-build = "1"
+napi-build = "2"
 
 [profile.release]
 codegen-units = 1
