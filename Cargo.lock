@@ -1422,13 +1422,12 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.0-beta.11"
+version = "0.50.0-beta.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "769a8918ca8d8360e4ade78fe164b3f5c7b7761ea964f32f1ba6caa5cee0814a"
+checksum = "da77fc9cb630ef0b7ebe47b7b611836b178ed45257ed04a5a19e9aaac4ae5c99"
 dependencies = [
  "aes",
  "aes-gcm",
- "async-trait",
  "bitflags",
  "block-padding",
  "byteorder",
@@ -1502,7 +1501,6 @@ name = "russh-napi"
 version = "0.1.0"
 dependencies = [
  "async-http-proxy",
- "async-trait",
  "delegate 0.12.0",
  "env_logger",
  "futures",

@@ -4,7 +4,6 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use async_trait::async_trait;
 use channel::{NewSshChannel, SshChannel};
 use key::{SshKeyPair, SshPublicKey};
 use log::debug;
@@ -92,7 +91,6 @@ pub fn supported_key_types() -> Vec<String> {
         .collect()
 }
 
-#[async_trait]
 impl russh::client::Handler for SSHClientHandler {
     type Error = WrappedError;
 
@@ -505,6 +503,7 @@ impl SshClient {
 }
 
 #[napi]
+#[allow(clippy::too_many_arguments)]
 pub async fn connect(
     transport: &SshTransport,
     cipher_algos: Option<Vec<String>>,

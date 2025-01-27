@@ -4,7 +4,7 @@ license = "Apache-2.0"
 name = "russh-napi"
 repository = "https://github.com/warp-tech/russh"
 version = "0.1.0"
-rust-version = "1.73"
+rust-version = "1.75"
 
 [lib]
 crate-type = ["cdylib"]
@@ -14,10 +14,9 @@ log = "0.4"
 napi = { version = "3.0.0-alpha", features = ["async"] }
 napi-derive = "3.0.0-alpha"
 tokio = { version = "1.17.0", features = ["macros", "process"] }
-russh = { version = "0.50.0-beta.11" }
-# russh = { version = "0.50.0-beta.11", path = "../russh/russh" }
+russh = { version = "0.50.0-beta.12" }
+# russh = { version = "0.50.0-beta.12", path = "../russh/russh" }
 pageant = { version = "0.0.2" }
-async-trait = "0.1"
 futures = "0.3"
 thiserror = "1.0"
 delegate = "0.12.0"

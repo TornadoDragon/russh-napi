@@ -69,6 +69,7 @@ pub async fn get_agent_client(
 
 #[napi]
 pub struct SshAgentStream {
+    #[allow(clippy::type_complexity)]
     writer: Arc<Mutex<Option<tokio::io::WriteHalf<Box<dyn AgentStream + Send + Unpin>>>>>,
 }
 
