@@ -426,22 +426,22 @@ impl SshClient {
             remaining_methods: MethodSet::empty(),
         };
 
+        let best_hash = handle
+            .best_supported_rsa_hash()
+            .await
+            .map_err(|e| napi::Error::from(WrappedError::from(e)))?
+            .flatten();
+
         for key in keys {
             debug!("Trying key {key:?}");
-            let possible_hashes = match key.algorithm() {
-                Algorithm::Rsa { .. } => &[Some(HashAlg::Sha512), Some(HashAlg::Sha256), None][..],
-                _ => &[None][..],
-            };
-            for hash_alg in possible_hashes {
-                let result = handle
-                    .authenticate_publickey_with(&username, key.clone(), *hash_alg, &mut agent)
-                    .await;
-                let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
-                if ret.success() {
-                    return Ok(ret.into());
-                }
-                last_auth_result = ret;
+            let result = handle
+                .authenticate_publickey_with(&username, key.clone(), best_hash, &mut agent)
+                .await;
+            let ret = result.map_err(|e| napi::Error::from(WrappedError::from(e)))?;
+            if ret.success() {
+                return Ok(ret.into());
             }
+            last_auth_result = ret;
         }
 
         Ok(last_auth_result.into())
