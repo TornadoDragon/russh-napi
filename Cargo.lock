@@ -1472,9 +1472,9 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.0-beta.12"
+version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da77fc9cb630ef0b7ebe47b7b611836b178ed45257ed04a5a19e9aaac4ae5c99"
+checksum = "edf1dcef70e6edcd509c229a206c54b6a6c7f617f242518049b3fce3f9b84a57"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -1537,11 +1537,12 @@ dependencies = [
 
 [[package]]
 name = "russh-cryptovec"
-version = "0.48.0"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d8e7e854e1a87e4be00fa287c98cad23faa064d0464434beaa9f014ec3baa98"
+checksum = "1fcb7c127135848b47715b5bcb13d8a27ccd86ce1de1c15eab5982df91fe279a"
 dependencies = [
  "libc",
+ "log",
  "ssh-encoding",
  "winapi",
 ]
@@ -1586,9 +1587,9 @@ dependencies = [
 
 [[package]]
 name = "russh-util"
-version = "0.48.0"
+version = "0.50.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92c7dd577958c0cefbc8f8a2c05c48c88c42e2fdb760dbe9b96ae31d4de97a1f"
+checksum = "c698d702527b51a82e64de98d506e9c1e83a063035d41df4f2354499ec090b79"
 dependencies = [
  "chrono",
  "tokio",
