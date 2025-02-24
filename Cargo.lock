@@ -891,9 +891,9 @@ dependencies = [
 
 [[package]]
 name = "internal-russh-forked-ssh-key"
-version = "0.6.9+upstream-0.6.7"
+version = "0.6.10+upstream-0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb5af01d366561582e9ea5f841837cc1d8e37e7142a32f33a43801e81863cba5"
+checksum = "33555bd765ace379fe85d97bb6d48b5783054f6048a7d5ec24cd9155e490e266"
 dependencies = [
  "argon2",
  "bcrypt-pbkdf",
@@ -1472,9 +1472,9 @@ dependencies = [
 
 [[package]]
 name = "russh"
-version = "0.50.3"
+version = "0.51.0-beta.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edf1dcef70e6edcd509c229a206c54b6a6c7f617f242518049b3fce3f9b84a57"
+checksum = "9149110de8ec48540b2c120ca3eafe4e0f46bc01cbcad3a92805e687f4f0905a"
 dependencies = [
  "aes",
  "aes-gcm",
