@@ -243,6 +243,7 @@ impl From<russh::client::Prompt> for KeyboardInteractiveAuthenticationPrompt {
 #[napi]
 pub struct KeyboardInteractiveAuthenticationState {
     pub state: String,
+    pub partial_success: bool,
     pub name: Option<String>,
     pub instructions: Option<String>,
     pub remaining_methods: Vec<String>,
@@ -266,20 +267,23 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
                 KeyboardInteractiveAuthenticationState {
                     state: "success".into(),
                     remaining_methods: vec![],
+                    partial_success: false,
                     instructions: None,
                     prompts: None,
                     name: None,
                 }
             }
-            russh::client::KeyboardInteractiveAuthResponse::Failure { remaining_methods } => {
-                KeyboardInteractiveAuthenticationState {
-                    state: "failure".into(),
-                    instructions: None,
-                    remaining_methods: remaining_methods.iter().map(|x| x.into()).collect(),
-                    prompts: None,
-                    name: None,
-                }
-            }
+            russh::client::KeyboardInteractiveAuthResponse::Failure {
+                remaining_methods,
+                partial_success,
+            } => KeyboardInteractiveAuthenticationState {
+                state: "failure".into(),
+                partial_success,
+                instructions: None,
+                remaining_methods: remaining_methods.iter().map(|x| x.into()).collect(),
+                prompts: None,
+                name: None,
+            },
             russh::client::KeyboardInteractiveAuthResponse::InfoRequest {
                 name,
                 instructions,
@@ -287,6 +291,7 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
             } => KeyboardInteractiveAuthenticationState {
                 state: "infoRequest".to_string(),
                 name: Some(name),
+                partial_success: false,
                 remaining_methods: vec![],
                 instructions: Some(instructions),
                 prompts: Some(prompts.into_iter().map(Into::into).collect()),
@@ -298,18 +303,25 @@ impl From<russh::client::KeyboardInteractiveAuthResponse>
 #[napi]
 pub struct SshAuthResult {
     pub success: bool,
+    pub partial_success: bool,
     pub remaining_methods: Vec<String>,
 }
 
 impl From<AuthResult> for SshAuthResult {
     fn from(r: AuthResult) -> Self {
-        SshAuthResult {
-            success: r.success(),
-            remaining_methods: match r {
-                AuthResult::Success => vec![],
-                AuthResult::Failure { remaining_methods } => {
-                    remaining_methods.iter().map(|x| x.into()).collect()
-                }
+        match r {
+            AuthResult::Success => SshAuthResult {
+                partial_success: false,
+                remaining_methods: vec![],
+                success: true,
+            },
+            AuthResult::Failure {
+                partial_success,
+                remaining_methods,
+            } => SshAuthResult {
+                success: false,
+                partial_success,
+                remaining_methods: remaining_methods.iter().map(|x| x.into()).collect(),
             },
         }
     }
@@ -421,6 +433,7 @@ impl SshClient {
 
         let mut last_auth_result = AuthResult::Failure {
             remaining_methods: MethodSet::empty(),
+            partial_success: false,
         };
 
         let best_hash = handle
