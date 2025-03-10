@@ -563,6 +563,10 @@ pub async fn connect(
         preferred.kex = kex_algos
             .into_iter()
             .filter_map(|x| russh::kex::Name::try_from(&x[..]).ok())
+            .chain([
+                russh::kex::EXTENSION_SUPPORT_AS_CLIENT,
+                russh::kex::EXTENSION_OPENSSH_STRICT_KEX_AS_CLIENT,
+            ])
             .collect();
     }
     if let Some(key_algos) = key_algos {
