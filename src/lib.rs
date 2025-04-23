@@ -13,7 +13,7 @@ use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use russh::client::{AuthResult, DisconnectReason};
 use russh::keys::key::PrivateKeyWithHashAlg;
-use russh::{ChannelId, MethodSet};
+use russh::{ChannelId, MethodSet, SshId};
 use tokio::sync::Mutex;
 
 use error::WrappedError;
@@ -592,6 +592,7 @@ pub async fn connect(
 
     let cfg = russh::client::Config {
         preferred,
+        client_id: SshId::Standard("SSH-2.0-nsssh2_8.0.0014 NetSarang Computer, Inc.".parse()?),
         keepalive_interval: keepalive_interval_seconds.map(|x| Duration::from_secs(x as u64)),
         keepalive_max: keepalive_max as usize,
         ..Default::default()
